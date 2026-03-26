@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support Widget</title>
+<!--Recapture script-->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<!-- Prevent iframe embedding -->
+<meta http-equiv="X-Frame-Options" content="DENY">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/intasend-inlinejs-sdk@3.0.0/build/intasend-inline.js"></script>
+
+<style>
+
+/* BADGE */
+.support-badge{
+  /*position:fixed; bottom:14px; right:14px;*/
+
+
+
+
+
+
+  position:fixed; 
+  top:14px; 
+  left:14px;
+
+
+
+
+
+  padding:6px 12px;
+  border-radius:999px;
+  font:600 11px Inter;
+  background:#0f172a;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.3);
+}
+
+/* PANEL */
+.support-panel{
+  /*position:fixed; bottom:14px; right:14px;*/
+  width:220px; padding:14px;
+
+
+
+
+
+
+
+  position:fixed; 
+  top:50px;   /* slightly below the button */
+  left:14px;
+
+
+
+
+
+
+
+  border-radius:14px;
+  background:#0f172a;
+  color:#e5e7eb;
+  transform:translateY(120%);
+  opacity:0;
+  transition:.3s;
+  text-align: justify;
+}
+.support-panel.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+.support-panel h3{font-size:13px;color:#fff;}
+.support-panel p{font-size:11px;color:#cbd5f5;}
+
+#counter{
+  font-size:11px;
+  margin-top:4px;
+  color:#60a5fa;
+}
+
+.support-btn{
+  margin-top:10px;
+  padding:8px;
+  border-radius:999px;
+  background:#2563eb;
+  color:#fff;
+  text-align:center;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* MODAL (CENTERED + SMALL) */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal.show{ display:flex; }
+
+.modal-box{
+  width:90%;
+  max-width:260px; /* SMALL SIZE */
+  padding:18px;
+  border-radius:14px;
+
+  background:#ffffff;
+
+  box-shadow:
+    0 15px 40px rgba(0,0,0,.35),
+    0 0 20px rgba(37,99,235,.15);
+
+  animation:pop .25s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+/* HEADER */
+.modal-header{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.modal-header h3{
+  margin:0;
+  font-size:15px;
+  color:#0f172a;
+}
+
+.modal-header p{
+  font-size:11px;
+  color:#64748b;
+}
+
+/* PRESETS */
+.presets{
+  display:flex;
+  gap:5px;
+  margin:10px 0;
+}
+
+.presets button{
+  flex:1;
+  padding:6px;
+  border:none;
+  border-radius:8px;
+  background:#eef2ff;
+  font-size:11px;
+  cursor:pointer;
+}
+
+.presets button.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+/* INPUTS */
+.modal input{
+  width:90%;
+  padding:10px;
+  margin-top:8px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.modal input:focus{
+  border-color:#2563eb;
+  outline:none;
+}
+
+/* BUTTON */
+.pay-btn{
+  width:100%;
+  margin-top:12px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#2563eb;
+  color:#fff;
+  font-weight:600;
+  font-size:12px;
+  cursor:pointer;
+}
+
+/* SUCCESS */
+.success-popup{
+  position:fixed;
+  top:15px;
+  right:15px;
+  background:#16a34a;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:12px;
+}
+
+
+
+
+
+.close-btn{
+  position:absolute;
+  top:6px;
+  right:8px;
+  font-size:14px;
+  border:none;
+  background:none;
+  cursor:pointer;
+  color:#aaa;
+}
+
+
+
+
+
+
+
+
+
+#donateBtn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  font-size:14px;
+  color:#fff;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  box-shadow:0 6px 20px rgba(37,99,235,0.4);
+
+  transition:all .25s ease;
+}
+
+/* HOVER GLOW */
+#donateBtn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 25px rgba(6,182,212,0.6);
+}
+
+/* CLICK PRESS */
+#donateBtn:active{
+  transform:scale(0.96);
+}
+
+/* SHIMMER EFFECT */
+
+#donateBtn::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:100%;
+  background:linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.4),
+    transparent
+  );
+  transition:.6s;
+}
+
+</style>
+</head>
+
+<body>
+
+
+
+
+  <!--ADDED BODY CHECKOUT-->
+
+
+<div id="donationBox" style="max-width:320px;margin:60px auto;text-align:center;font-family:Inter">
+
+  <h2 style="margin-bottom:6px;">Support This Project 💙</h2>
+  <p style="font-size:13px;color:#64748b;margin-bottom:10px;">
+    Your contribution keeps this alive 🚀
+  </p>
+
+  <!-- LIVE TOTAL -->
+  <div id="donationTotal" style="font-size:12px;color:#2563eb;margin-bottom:12px;">
+    Loading total...
+  </div>
+
+  <!-- CARD ICONS -->
+  <div style="margin-bottom:10px;">
+    <img src="https://img.icons8.com/color/48/visa.png" width="26">
+    <img src="https://img.icons8.com/color/48/mastercard.png" width="26">
+    <img src="https://img.icons8.com/color/48/apple-pay.png" width="26">
+    <img src="https://img.icons8.com/color/48/google-pay.png" width="26">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/1/15/M-PESA_LOGO-01.svg" width="50">
+  </div>
+
+  <!-- TRUST BADGE -->
+  <div style="font-size:11px;color:#16a34a;margin-bottom:10px;">
+    🔒 Secure payments powered by IntaSend
+  </div>
+
+  <!-- PRESETS -->
+  <div style="display:flex;gap:6px;margin-bottom:10px;">
+    <button onclick="DONATE.setAmount(50,this)">50</button>
+    <button onclick="DONATE.setAmount(100,this)">100</button>
+    <button onclick="DONATE.setAmount(250,this)">250</button>
+    <button onclick="DONATE.setAmount(500,this)">500</button>
+  </div>
+
+  <!-- INPUTS -->
+  <input id="donateAmount" type="number" placeholder="Amount (KES)"
+    style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #ddd">
+
+  <input id="donateEmail" type="email" placeholder="Email eg mc.owino20@gmail.com"
+    style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #ddd">
+
+<!--Recapture-->
+<!--
+<div class="g-recaptcha" data-sitekey="6LdIpUUqAAAAAG0EjNsQFYxFoSr3KlwKq69VAg0q"></div>
+-->
+ <!-- replace with your recaptcha SITE key not secret key --> 
+
+
+<br>
+
+  <!-- BUTTON -->
+  <button id="donateBtn" onclick="DONATE.pay()"
+    style="width:100%;padding:11px;background:#2563eb;color:#fff;border:none;border-radius:8px;">
+    Contribute Now
+  </button>
+
+</div>
+
+   <!--END OFADDED BODY CHECKOUT--> 
+
+
+
+
+<div class="support-badge" onclick="openPanel()">❤️ Support</div>
+
+
+
+
+
+<div id="panel" class="support-panel">
+
+  <button class="close-btn" onclick="dismissPanel()">×</button>
+
+  <h3>Support this work</h3>
+  <p>Fuel innovation.Step into something extraordinary. Your support is more than a gesture — it’s the heartbeat of bold ideas, the spark behind groundbreaking solutions, and the force that turns ambition into reality. <br><br>
+   Join a circle of visionaries who don’t just watch the future unfold — they help create it. Every contribution you make elevates innovation, empowers brilliance, and leaves a lasting mark 🚀.</p>
+  <div id="counter">Loading...</div>
+
+
+
+
+
+
+
+
+  <div class="support-btn" onclick="openModal()">Contribute</div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h3>Support 💙</h3>
+      <p>Make an impact</p>
+    </div>
+
+    <div class="presets">
+      <button onclick="setAmount(50,this)">50</button>
+      <button onclick="setAmount(100,this)">100</button>
+      <button onclick="setAmount(250,this)">250</button>
+      <button onclick="setAmount(500,this)">500</button>
+    </div>
+
+    <input type="number" id="amount" placeholder="Amount (KES)">
+    <input type="email" id="email" placeholder="Email eg mc.owino20@gmail.com">
+
+    <button class="pay-btn" onclick="pay()">Pay Now</button>
+
+  </div>
+</div>
+
+<script>
+
+const API_URL="https://script.google.com/macros/s/AKfycbybEQxvPRvlAK8da5D017tfQBKAVkNr2oa3rxsoymCLE13RhJNEmmyHdrzFV-J8tk8f/exec";
+
+/* UI */
+function openPanel(){
+  document.getElementById("panel").classList.add("show");
+}
+
+function openModal(){
+  document.getElementById("modal").classList.add("show");
+}
+
+document.getElementById("modal").onclick=function(e){
+  if(e.target.id==="modal") this.classList.remove("show");
+};
+
+function setAmount(val,el){
+  document.getElementById("amount").value=val;
+  document.querySelectorAll(".presets button").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+}
+
+/* SUCCESS */
+function showSuccess(){
+  const d=document.createElement("div");
+  d.className="success-popup";
+  d.innerText="🎉 Payment Successful!";
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2500);
+}
+
+/* PAYMENT */
+function pay(){
+
+  const amount=document.getElementById("amount").value;
+  const email=document.getElementById("email").value;
+
+  if(!amount||amount<10) return alert("Minimum 10 KES");
+  if(!email.includes("@")) return alert("Valid email required");
+
+  new window.IntaSend({
+    publicAPIKey:"ISPubKey_live_79fff6a0-2a9e-4e38-b442-d00c56a58789",
+    live:true
+  })
+  .on("COMPLETE",(res)=>{
+
+    showSuccess();
+
+    fetch(API_URL,{
+      method:"POST",
+      body:JSON.stringify({
+        email,amount,
+        reference:res.invoice_id||Date.now(),
+        status:"COMPLETE"
+      })
+    });
+
+    document.getElementById("modal").classList.remove("show");
+    fetchStats();
+
+  })
+  .on("FAILED",()=>alert("Payment failed"))
+  .run({amount,currency:"KES",email});
+}
+
+/* LIVE COUNTER */
+async function fetchStats(){
+  try{
+    const r=await fetch(API_URL);
+    const d=await r.json();
+    if(Array.isArray(d)){
+      let t=d.reduce((s,x)=>s+Number(x.amount),0);
+      document.getElementById("counter").innerText="KES "+t+" raised";
+    }
+  }catch{
+    document.getElementById("counter").innerText="Supporters active 💙";
+  }
+}
+
+fetchStats();
+setInterval(fetchStats,5000);
+
+</script>
+<script>
+  document.addEventListener("click", function(e){
+  const panel = document.getElementById("panel");
+  const badge = document.getElementById("badge");
+
+  if(
+    panel.classList.contains("show") &&
+    !panel.contains(e.target) &&
+    !badge.contains(e.target)
+  ){
+    panel.classList.remove("show");
+  }
+});
+
+</script>
+
+<script>
+  function dismissPanel(){
+  document.getElementById("panel").classList.remove("show");
+}
+</script>
+
+
+
+
+
+
+<script>
+const DONATE = (function(){
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbybEQxvPRvlAK8da5D017tfQBKAVkNr2oa3rxsoymCLE13RhJNEmmyHdrzFV-J8tk8f/exec";
+
+  /* =========================
+  SET AMOUNT
+  ========================= */
+  function setAmount(val, el){
+    document.getElementById("donateAmount").value = val;
+
+    document.querySelectorAll("#donationBox button")
+      .forEach(b => b.style.background = "#eee");
+
+    el.style.background = "#2563eb";
+    el.style.color = "#fff";
+  }
+
+  /* =========================
+  BUTTON ANIMATION
+  ========================= */
+  function animateBtn(btn){
+    btn.style.transform = "scale(0.96)";
+    setTimeout(()=> btn.style.transform = "scale(1)",150);
+  }
+
+  /* =========================
+  PAYMENT
+  ========================= */
+  function pay(){
+
+    const amount = document.getElementById("donateAmount").value;
+    const email = document.getElementById("donateEmail").value;
+    const btn = document.getElementById("donateBtn");
+
+    if(!amount || amount < 10){
+      alert("Minimum 10 KES");
+      return;
+    }
+
+    if(!email.includes("@")){
+      alert("Valid email required");
+      return;
+    }
+
+    animateBtn(btn);
+
+    new window.IntaSend({
+      publicAPIKey: "ISPubKey_live_79fff6a0-2a9e-4e38-b442-d00c56a58789",
+      live: true
+    })
+    .on("COMPLETE", (res)=>{
+
+      alert("🎉 Payment successful!");
+
+      /* SAVE USING EXISTING BACKEND */
+      fetch(API_URL,{
+        method:"POST",
+        body: JSON.stringify({
+          email: email,
+          amount: amount,
+          reference: res.invoice_id || Date.now(),
+          status: "COMPLETE"
+        })
+      });
+
+      fetchTotal();
+
+    })
+    .on("FAILED", ()=> alert("Payment failed"))
+    .run({
+      amount: amount,
+      currency: "KES",
+      email: email
+    });
+
+  }
+
+  /* =========================
+  LIVE TOTAL
+  ========================= */
+  async function fetchTotal(){
+    try{
+      const res = await fetch(API_URL);
+      const data = await res.json();
+
+      if(Array.isArray(data)){
+        let total = data.reduce((sum,d)=>sum + Number(d.amount),0);
+        document.getElementById("donationTotal").innerText =
+          "KES " + total + " raised";
+      }
+    }catch{
+      document.getElementById("donationTotal").innerText =
+        "Supporters active 💙";
+    }
+  }
+
+  setInterval(fetchTotal,5000);
+  fetchTotal();
+
+  return { setAmount, pay };
+
+})();
+</script>
+
+<script>
+/* =================================
+   1. Disable Right Click
+================================= */
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+/* =================================
+   2. Disable Copy / Cut / Paste
+================================= */
+["copy", "cut", "paste", "dragstart"].forEach(evt => {
+  document.addEventListener(evt, e => e.preventDefault());
+});
+
+/* =================================
+   3. Block DevTools Shortcuts
+================================= */
+document.addEventListener("keydown", function (e) {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key)) ||
+    (e.ctrlKey && e.key === "U")
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
+
+/* =================================
+   4. DevTools Size Detection
+================================= */
+setInterval(() => {
+  const widthDiff  = window.outerWidth - window.innerWidth;
+  const heightDiff = window.outerHeight - window.innerHeight;
+
+  if (widthDiff > 160 || heightDiff > 160) {
+    document.body.innerHTML =
+      "<h2 style='color:red;margin-top:20%'>Access Denied</h2>";
+  }
+}, 1000);
+
+/* =================================
+   5. Console Open Detection
+================================= */
+(function () {
+  const element = new Image();
+  Object.defineProperty(element, "id", {
+    get: function () {
+      document.body.innerHTML =
+        "<h2 style='color:red;margin-top:20%'>Inspection Blocked</h2>";
+    }
+  });
+  console.log(element);
+})();
+
+/* =================================
+   6. Anti-Debugger Trap
+================================= */
+setInterval(function () {
+  debugger;
+}, 2000);
+
+/* =================================
+   7. Hide Source via Visibility Change
+================================= */
+document.addEventListener("visibilitychange", function () {
+  if (document.hidden) {
+    document.body.style.display = "none";
+  } else {
+    document.body.style.display = "block";
+  }
+});
+
+/* =================================
+   8. Disable View Source via Mouse
+================================= */
+document.onmousedown = function (e) {
+  if (e.button === 2) return false;
+};
+</script>
+
+</body>
+</html>
