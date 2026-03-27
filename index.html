@@ -280,6 +280,101 @@
   transition:.6s;
 }
 
+
+
+/* ===== WHATSAPP FLOAT ===== */
+/*
+.whatsapp-float {
+  position: fixed;
+  width: 55px;
+  height: 55px;
+  bottom: 20px;
+  right: 20px;
+  background: #25D366;
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 28px;
+ line-height: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+  transition: 0.3s;
+}
+
+.whatsapp-float:hover {
+  background: #1ebe5d;
+  transform: scale(1.1);
+}
+*/
+
+
+
+
+.whatsapp-float {
+  position: fixed;
+  width: 55px;
+  height: 55px;
+  bottom: 20px;
+  right: 20px;
+  background: #25D366;
+  color: #fff;
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 28px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.whatsapp-float:hover {
+  background: #1ebe5d;
+  transform: scale(1.1);
+}
+
+
+
+
+
+/* Tooltip */
+.wa-tooltip {
+  position: absolute;
+  right: 65px;
+  background: #111;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+
+  opacity: 0;
+  transform: translateX(10px);
+  transition: 0.3s;
+  pointer-events: none;
+}
+
+/* Tooltip arrow */
+.wa-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent #111;
+}
+
+/* Show on hover */
+.whatsapp-float:hover .wa-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 </style>
 </head>
 
@@ -401,6 +496,21 @@
 
   </div>
 </div>
+
+
+<!--WHATSAPP FLOATING BUTTON-->
+<!--
+<a href="https://wa.me/254742955188" class="whatsapp-float" target="_blank">
+  <i class="fab fa-whatsapp"></i>
+</a>
+-->
+
+<a href="https://wa.me/254742955188" class="whatsapp-float" target="_blank">
+  <i class="fab fa-whatsapp"></i>
+  <span class="wa-tooltip">Chat with us</span>
+</a>
+
+
 
 <script>
 
