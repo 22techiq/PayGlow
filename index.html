@@ -698,5 +698,35 @@ document.onmousedown = function (e) {
 };
 </script>
 
+
+
+<script>
+/* =========================
+   RECAPTCHA GUARD FOR #donateBtn
+========================= */
+
+(function(){
+
+  const btn = document.getElementById("donateBtn");
+
+  function isCaptchaValid(){
+    return (typeof grecaptcha !== "undefined" && grecaptcha.getResponse().length > 0);
+  }
+
+  btn.addEventListener("click", function(e){
+
+    if(!isCaptchaValid()){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      alert("⚠️ Please verify you're not a robot");
+      return false;
+    }
+
+  }, true); // 👈 IMPORTANT: capture phase
+
+})();
+</script>
+
 </body>
 </html>
