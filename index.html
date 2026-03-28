@@ -232,6 +232,7 @@
 
 
 #donateBtn{
+
   width:100%;
   padding:12px;
   border:none;
@@ -267,6 +268,11 @@
 /* SHIMMER EFFECT */
 
 #donateBtn::before{
+
+
+
+  pointer-events: none;
+
   content:"";
   position:absolute;
   top:0;
@@ -281,6 +287,7 @@
   );
   transition:.6s;
 }
+
 
 
 
