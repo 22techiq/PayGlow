@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>Support Widget</title>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<meta http-equiv="X-Frame-Options" content="DENY">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/intasend-inlinejs-sdk@3.0.0/build/intasend-inline.js"></script>
+
+<style>
+
+/* KEEP EVERYTHING SAME — ONLY ADD FIX BELOW */
+/* BADGE */
+.support-badge{
+  /*position:fixed; bottom:14px; right:14px;*/
+
+
+
+
+
+
+  position:fixed; 
+  top:14px; 
+  left:14px;
+
+
+
+
+
+  padding:6px 12px;
+  border-radius:999px;
+  font:600 11px Inter;
+  background:#0f172a;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.3);
+}
+
+/* PANEL */
+.support-panel{
+  /*position:fixed; bottom:14px; right:14px;*/
+  width:220px; padding:14px;
+
+
+
+
+
+
+
+  position:fixed; 
+  top:50px;   /* slightly below the button */
+  left:14px;
+
+
+
+
+
+
+
+  border-radius:14px;
+  background:#0f172a;
+  color:#e5e7eb;
+  transform:translateY(120%);
+  opacity:0;
+  transition:.3s;
+  text-align: justify;
+}
+.support-panel.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+.support-panel h3{font-size:13px;color:#fff;}
+.support-panel p{font-size:11px;color:#cbd5f5;}
+
+#counter{
+  font-size:11px;
+  margin-top:4px;
+  color:#60a5fa;
+}
+
+.support-btn{
+  margin-top:10px;
+  padding:8px;
+  border-radius:999px;
+  background:#2563eb;
+  color:#fff;
+  text-align:center;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* MODAL (CENTERED + SMALL) */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal.show{ display:flex; }
+
+.modal-box{
+  width:90%;
+  max-width:260px; /* SMALL SIZE */
+  padding:18px;
+  border-radius:14px;
+
+  background:#ffffff;
+
+  box-shadow:
+    0 15px 40px rgba(0,0,0,.35),
+    0 0 20px rgba(37,99,235,.15);
+
+  animation:pop .25s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+/* HEADER */
+.modal-header{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.modal-header h3{
+  margin:0;
+  font-size:15px;
+  color:#0f172a;
+}
+
+.modal-header p{
+  font-size:11px;
+  color:#64748b;
+}
+
+/* PRESETS */
+.presets{
+  display:flex;
+  gap:5px;
+  margin:10px 0;
+}
+
+.presets button{
+  flex:1;
+  padding:6px;
+  border:none;
+  border-radius:8px;
+  background:#eef2ff;
+  font-size:11px;
+  cursor:pointer;
+}
+
+.presets button.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+/* INPUTS */
+.modal input{
+  width:90%;
+  padding:10px;
+  margin-top:8px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.modal input:focus{
+  border-color:#2563eb;
+  outline:none;
+}
+
+/* BUTTON */
+.pay-btn{
+  width:100%;
+  margin-top:12px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#2563eb;
+  color:#fff;
+  font-weight:600;
+  font-size:12px;
+  cursor:pointer;
+}
+
+/* SUCCESS */
+.success-popup{
+  position:fixed;
+  top:15px;
+  right:15px;
+  background:#16a34a;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:12px;
+}
+
+
+
+
+
+.close-btn{
+  position:absolute;
+  top:6px;
+  right:8px;
+  font-size:14px;
+  border:none;
+  background:none;
+  cursor:pointer;
+  color:#aaa;
+}
+
+
+
+/*CODE  AFFECTECTING OVERLAY*/
+#donateBtn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  font-size:14px;
+  color:#fff;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  box-shadow:0 6px 20px rgba(37,99,235,0.4);
+
+  transition:all .25s ease;
+  /*Force button to sit above everything*/
+  position: relative;
+  z-index: 10;
+}
+
+/* HOVER GLOW */
+#donateBtn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 25px rgba(6,182,212,0.6);
+  background-color: black !important;
+}
+
+/* CLICK PRESS */
+#donateBtn:active{
+  transform:scale(0.96);
+}
+
+/* SHIMMER EFFECT */
+
+#donateBtn::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:100%;
+  background:linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.4),
+    transparent
+  );
+  transition:.6s;
+}
+
+
+/*END OF CODE AFFECTING OVERLAY*/
+
+
+
+
+
+
+
+
+
+
+
+
+/* FIX BUTTON OVERLAY */
+#donateBtn::before{
+  pointer-events: none;
+}
+
+#donateBtn span{
+  position: relative;
+  z-index: 2;
+}
+
+/* (rest of your CSS remains unchanged) */
+.whatsapp-float {
+  position: fixed;
+  width: 55px;
+  height: 55px;
+  bottom: 20px;
+  right: 20px;
+  background: #25D366;
+  color: #fff;
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 28px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.whatsapp-float:hover {
+  background: #1ebe5d;
+  transform: scale(1.1);
+}
+
+
+
+
+
+/* Tooltip */
+.wa-tooltip {
+  position: absolute;
+  right: 65px;
+  background: #111;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+
+  opacity: 0;
+  transform: translateX(10px);
+  transition: 0.3s;
+  pointer-events: none;
+}
+
+/* Tooltip arrow */
+.wa-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent #111;
+}
+
+/* Show on hover */
+.whatsapp-float:hover .wa-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+.footer {
+  margin-top: 70px;
+  padding: 25px 15px 15px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* CONTAINER */
+.footer-inner {
+  max-width: 850px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+}
+
+/* BRAND */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: 0.2px;
+}
+
+.brand-tagline {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: justify;
+}
+
+/* NAV */
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+}
+
+.footer-nav a {
+  font-size: 12px;
+  color: #64748b;
+  text-decoration: none;
+  position: relative;
+  font-weight: 500;
+}
+
+/* smooth underline */
+.footer-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0%;
+  height: 1px;
+  background: #2563eb;
+  transition: width 0.25s ease;
+}
+
+.footer-nav a:hover::after {
+  width: 100%;
+}
+
+.footer-nav a:hover {
+  color: #0f172a;
+}
+
+/* SOCIALS */
+.footer-socials {
+  display: flex;
+  gap: 14px;
+}
+
+.footer-socials a {
+  font-size: 15px;
+  color: #94a3b8;
+  transition: all 0.25s ease;
+}
+
+.footer-socials a:hover {
+  color: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* META */
+.footer-meta {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+/* dot separator */
+.dot {
+  width: 3px;
+  height: 3px;
+  background: #94a3b8;
+  border-radius: 50%;
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .footer-nav {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .footer-socials {
+    justify-content: center;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="donationBox" style="max-width:320px;margin:60px auto;text-align:center;font-family:Inter">
+
+  <h2 style="margin-bottom:6px;">Support This Project 💙</h2>
+  <p style="font-size:13px;color:#64748b;margin-bottom:10px;">
+    Your contribution keeps this alive 🚀
+  </p>
+
+  <div id="donationTotal" style="font-size:12px;color:#2563eb;margin-bottom:12px;">
+    Loading total...
+  </div>
+
+  <div style="margin-bottom:10px;">
+    <img src="https://img.icons8.com/color/48/visa.png" width="26">
+    <img src="https://img.icons8.com/color/48/mastercard.png" width="26">
+    <img src="https://img.icons8.com/color/48/apple-pay.png" width="26">
+    <img src="https://img.icons8.com/color/48/google-pay.png" width="26">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/1/15/M-PESA_LOGO-01.svg" width="50">
+  </div>
+
+  <div style="font-size:11px;color:#16a34a;margin-bottom:10px;">
+    🔒 Secure payments powered by IntaSend
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:10px;">
+    <button onclick="DONATE.setAmount(50,this)">50</button>
+    <button onclick="DONATE.setAmount(100,this)">100</button>
+    <button onclick="DONATE.setAmount(250,this)">250</button>
+    <button onclick="DONATE.setAmount(500,this)">500</button>
+  </div>
+
+  <input id="donateAmount" type="number" placeholder="Amount (KES)"
+    style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #ddd">
+
+  <input id="donateEmail" type="email" placeholder="Email eg mc.owino20@gmail.com"
+    style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #ddd">
+
+  <div class="g-recaptcha" data-sitekey="6Le6iJksAAAAAGH--BfG-QDBqSkMBFx5Rq7IkRJo"></div>
+
+  <br>
+
+  <!-- FIXED BUTTON -->
+  <button id="donateBtn" onclick="DONATE.pay()"
+    style="width:100%;padding:11px;background:#2563eb;color:#fff;border:none;border-radius:8px;">
+    <span>Contribute Now</span>
+  </button>
+
+</div>
+
+<!-- FIXED: added id="badge" -->
+<div id="badge" class="support-badge" onclick="openPanel()">❤️ Support</div>
+
+<div id="panel" class="support-panel">
+  <button class="close-btn" onclick="dismissPanel()">×</button>
+
+  <h3>Support this work</h3>
+  <p>Fuel innovation.Step into something extraordinary. Your support is more than a gesture — it’s the heartbeat of bold ideas, the spark behind groundbreaking solutions, and the force that turns ambition into reality. <br><br>
+   Join a circle of visionaries who don’t just watch the future unfold — they help create it. Every contribution you make elevates innovation, empowers brilliance, and leaves a lasting mark 🚀.</p>
+
+  <div id="counter">Loading...</div>
+
+  <div class="support-btn" onclick="openModal()">Contribute</div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h3>Support 💙</h3>
+      <p>Make an impact</p>
+    </div>
+
+    <div class="presets">
+      <button onclick="setAmount(50,this)">50</button>
+      <button onclick="setAmount(100,this)">100</button>
+      <button onclick="setAmount(250,this)">250</button>
+      <button onclick="setAmount(500,this)">500</button>
+    </div>
+
+    <input type="number" id="amount" placeholder="Amount (KES)">
+    <input type="email" id="email" placeholder="Email eg mc.owino20@gmail.com">
+
+    <button class="pay-btn" onclick="pay()">Pay Now</button>
+
+  </div>
+</div>
+
+<a href="https://wa.me/254742955188" class="whatsapp-float" target="_blank">
+  <i class="fab fa-whatsapp"></i>
+  <span class="wa-tooltip">Chat with us</span>
+</a>
+
+<footer class="footer">
+
+  <div class="footer-inner">
+
+    <!-- Brand -->
+    <div class="footer-brand">
+      <span class="brand-name">PayGlow</span>
+      <span class="brand-tagline">PayGlow is an idea built on simplifying digital contributions and empowering seamless support experiences. It brings together intuitive design, secure payment systems, and real-time engagement to help creators, developers, and innovators receive support effortlessly.<br>If you're exploring ways to enhance your payment integration or need technical guidance, feel free to get in touch — let’s build something efficient and impactful together.</span>
+    </div>
+
+    <!-- Links -->
+    <nav class="footer-nav">
+      <a href="#">Home</a>
+      <a href="#">Documentation</a>
+      <a href="#">Privacy</a>
+    </nav>
+
+    <!-- Social -->
+    <div class="footer-socials">
+      <a href="https://wa.me/254742955188"><i class="fab fa-whatsapp"></i></a>
+      <a href="#"><i class="fab fa-facebook"></i></a>
+      <a href="#"><i class="fas fa-envelope"></i></a>
+    </div>
+
+  </div>
+
+  <!-- Bottom -->
+  <div class="footer-meta">
+    <span>© 2026 PayGlow</span>
+    <span class="dot"></span>
+    <span>Developed by McOwino</span>
+  </div>
+
+<script>
+
+/* FIXED BADGE CLICK BUG */
+document.addEventListener("click", function(e){
+  const panel = document.getElementById("panel");
+  const badge = document.getElementById("badge");
+
+  if(
+    panel.classList.contains("show") &&
+    !panel.contains(e.target) &&
+    !badge.contains(e.target)
+  ){
+    panel.classList.remove("show");
+  }
+});
+
+</script>
+
+
+<script>
+
+const API_URL="https://script.google.com/macros/s/AKfycbybEQxvPRvlAK8da5D017tfQBKAVkNr2oa3rxsoymCLE13RhJNEmmyHdrzFV-J8tk8f/exec";
+
+/* UI */
+function openPanel(){
+  document.getElementById("panel").classList.add("show");
+}
+
+function openModal(){
+  document.getElementById("modal").classList.add("show");
+}
+
+document.getElementById("modal").onclick=function(e){
+  if(e.target.id==="modal") this.classList.remove("show");
+};
+
+function setAmount(val,el){
+  document.getElementById("amount").value=val;
+  document.querySelectorAll(".presets button").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+}
+
+/* SUCCESS */
+function showSuccess(){
+  const d=document.createElement("div");
+  d.className="success-popup";
+  d.innerText="🎉 Payment Successful!";
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2500);
+}
+
+/* PAYMENT */
+function pay(){
+
+  const amount=document.getElementById("amount").value;
+  const email=document.getElementById("email").value;
+
+  if(!amount||amount<10) return alert("Minimum 10 KES");
+  if(!email.includes("@")) return alert("Valid email required");
+
+  new window.IntaSend({
+    publicAPIKey:"ISPubKey_live_79fff6a0-2a9e-4e38-b442-d00c56a58789",
+    live:true
+  })
+  .on("COMPLETE",(res)=>{
+
+    showSuccess();
+
+    fetch(API_URL,{
+      method:"POST",
+      body:JSON.stringify({
+        email,amount,
+        reference:res.invoice_id||Date.now(),
+        status:"COMPLETE"
+      })
+    });
+
+    document.getElementById("modal").classList.remove("show");
+    fetchStats();
+
+  })
+  .on("FAILED",()=>alert("Payment failed"))
+  .run({amount,currency:"KES",email});
+}
+
+/* LIVE COUNTER */
+async function fetchStats(){
+  try{
+    const r=await fetch(API_URL);
+    const d=await r.json();
+    if(Array.isArray(d)){
+      let t=d.reduce((s,x)=>s+Number(x.amount),0);
+      document.getElementById("counter").innerText="KES "+t+" raised";
+    }
+  }catch{
+    document.getElementById("counter").innerText="Supporters active 💙";
+  }
+}
+
+fetchStats();
+setInterval(fetchStats,5000);
+
+</script>
+<script>
+  document.addEventListener("click", function(e){
+  const panel = document.getElementById("panel");
+  const badge = document.getElementById("badge");
+
+  if(
+    panel.classList.contains("show") &&
+    !panel.contains(e.target) &&
+    !badge.contains(e.target)
+  ){
+    panel.classList.remove("show");
+  }
+});
+
+</script>
+
+<script>
+  function dismissPanel(){
+  document.getElementById("panel").classList.remove("show");
+}
+</script>
+
+
+
+
+
+
+<script>
+const DONATE = (function(){
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbybEQxvPRvlAK8da5D017tfQBKAVkNr2oa3rxsoymCLE13RhJNEmmyHdrzFV-J8tk8f/exec";
+
+  /* =========================
+  SET AMOUNT
+  ========================= */
+  function setAmount(val, el){
+    document.getElementById("donateAmount").value = val;
+
+    document.querySelectorAll("#donationBox button")
+      .forEach(b => b.style.background = "#eee");
+
+    el.style.background = "#2563eb";
+    el.style.color = "#fff";
+  }
+
+  /* =========================
+  BUTTON ANIMATION
+  ========================= */
+  function animateBtn(btn){
+    btn.style.transform = "scale(0.96)";
+    setTimeout(()=> btn.style.transform = "scale(1)",150);
+  }
+
+  /* =========================
+  PAYMENT
+  ========================= */
+  function pay(){
+
+    const amount = document.getElementById("donateAmount").value;
+    const email = document.getElementById("donateEmail").value;
+    const btn = document.getElementById("donateBtn");
+
+    if(!amount || amount < 10){
+      alert("Minimum 10 KES");
+      return;
+    }
+
+    if(!email.includes("@")){
+      alert("Valid email required");
+      return;
+    }
+
+    animateBtn(btn);
+
+    new window.IntaSend({
+      publicAPIKey: "ISPubKey_live_79fff6a0-2a9e-4e38-b442-d00c56a58789",
+      live: true
+    })
+    .on("COMPLETE", (res)=>{
+
+      alert("🎉 Payment successful!");
+
+      /* SAVE USING EXISTING BACKEND */
+      fetch(API_URL,{
+        method:"POST",
+        body: JSON.stringify({
+          email: email,
+          amount: amount,
+          reference: res.invoice_id || Date.now(),
+          status: "COMPLETE"
+        })
+      });
+
+      fetchTotal();
+
+    })
+    .on("FAILED", ()=> alert("Payment failed"))
+    .run({
+      amount: amount,
+      currency: "KES",
+      email: email
+    });
+
+  }
+
+  /* =========================
+  LIVE TOTAL
+  ========================= */
+  async function fetchTotal(){
+    try{
+      const res = await fetch(API_URL);
+      const data = await res.json();
+
+      if(Array.isArray(data)){
+        let total = data.reduce((sum,d)=>sum + Number(d.amount),0);
+        document.getElementById("donationTotal").innerText =
+          "KES " + total + " raised";
+      }
+    }catch{
+      document.getElementById("donationTotal").innerText =
+        "Supporters active 💙";
+    }
+  }
+
+  setInterval(fetchTotal,5000);
+  fetchTotal();
+
+  return { setAmount, pay };
+
+})();
+</script>
+
+
+
+<script>
+/* =========================
+   RECAPTCHA GUARD FOR #donateBtn
+========================= */
+
+(function(){
+
+  const btn = document.getElementById("donateBtn");
+
+  function isCaptchaValid(){
+    return (typeof grecaptcha !== "undefined" && grecaptcha.getResponse().length > 0);
+  }
+
+  btn.addEventListener("click", function(e){
+
+    if(!isCaptchaValid()){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      alert("⚠️ Please verify you're not a robot");
+      return false;
+    }
+
+  }, true); // 👈 IMPORTANT: capture phase
+
+})();
+</script>
+
+</body>
+</html>
