@@ -3,7 +3,7 @@
  *********************************/
 const SHEET_NAME = "PAYMENTS";
 const ADMIN_EMAILS = ["22techiq@gmail.com","mc.owino254@gmail.com"];
-const RECAPTCHA_SECRET = "6Ldpl5wsAAAAAJwd9OzrOFCRt_P3DxzCaLraWiNz";
+const RECAPTCHA_SECRET = "6Ld";
 
 /*********************************
  * 🚀 MAIN ENTRY (POST)
