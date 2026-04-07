@@ -100,7 +100,7 @@ button{
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxNdrNoq2osLkax_1kiO5yNvienJh24WH866U8LJNNOZTFetij4gX77wJ92cALnMASY/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxT5HmpEUCPzlPiaWwuIYs4O3DEZ5wPq22fclOA8x4uhsqXKrsbtmOBdsKrg1KwAGPD/exec";
 
 /* =========================
    VALIDATION
@@ -160,6 +160,7 @@ function pay(){
 
       /* 🔥 FORM DATA (CRITICAL FIX) */
       const formData = new FormData();
+      formData.append("origin", window.location.origin);
       formData.append("name", data.name);
       formData.append("phone", data.phone);
       formData.append("email", data.email);
