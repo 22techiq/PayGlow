@@ -1,3 +1,26 @@
+
+/*********************************
+ * 🌍 ORIGIN CHECK (APPENDED SAFE)
+ *********************************/
+(function(){
+
+  const ALLOWED_ORIGIN = "https://yourdomain.com"; // 🔴 change this
+
+  const origin = e.parameter.origin || "";
+
+  if(origin !== ALLOWED_ORIGIN){
+    throw new Error("Blocked request: invalid origin");
+  }
+
+})();
+
+
+
+
+
+
+formData.append("origin", window.location.origin);
+
 /*********************************
  * ⚙️ CONFIG
  *********************************/
