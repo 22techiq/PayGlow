@@ -1,4 +1,14 @@
 
+/* =========================
+   🟢 WEBHOOK ROUTER (APPEND)
+========================= */
+if(isWebhookRequest(e)){
+  return handleWebhookStandalone(e);
+}
+
+
+
+
 /*********************************
  * 🧠 DETECT WEBHOOK REQUEST
  *********************************/
