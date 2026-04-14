@@ -99,7 +99,7 @@ button:disabled{
 <input id="email" placeholder="Email">
 <input id="amount" type="number" placeholder="Amount (KES)">
 
-<div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY"></div>
+<div class="g-recaptcha" data-sitekey="6Ldpl5wsAAAAAFSiNv_hdn7db0YBlnqrQ0AJ9CaM"></div>
 
 <button id="payBtn" onclick="pay()">Contribute</button>
 
@@ -163,7 +163,7 @@ function pay(){
   status.innerText = "⏳ Initiating payment...";
 
   new window.IntaSend({
-    publicAPIKey: "YOUR_PUBLIC_KEY",
+    publicAPIKey: "ISPubKey_live_79fff6a0-2a9e-4e38-b442-d00c56a58789",
     live: true
   })
   .on("COMPLETE", (res)=>{
