@@ -1,5 +1,111 @@
 
 /*********************************
+ * 🧠 DETECT WEBHOOK REQUEST
+ *********************************/
+function isWebhookRequest(e){
+  try{
+    const body = JSON.parse(e.postData.contents);
+    return body && body.invoice_id;
+  }catch{
+    return false;
+  }
+}
+
+/*********************************
+ * 🔐 INTASEND WEBHOOK HANDLER
+ *********************************/
+function handleWebhookStandalone(e){
+
+  const data = JSON.parse(e.postData.contents);
+
+  /* =========================
+     VERIFY SIGNATURE
+  ========================= */
+  const signature = e.parameter.signature || "";
+
+  if(!verifyIntaSendSignature(e.postData.contents, signature)){
+    throw new Error("Invalid webhook signature");
+  }
+
+  /* =========================
+     ONLY SUCCESSFUL PAYMENTS
+  ========================= */
+  if(data.state !== "COMPLETE"){
+    return respond({status:"ignored"});
+  }
+
+  const name = data.first_name || "Customer";
+  const email = data.email || "";
+  const phone = data.phone_number || "";
+  const amount = Number(data.value);
+  const reference = data.invoice_id;
+
+  const sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName(SHEET_NAME);
+
+  /* =========================
+     PREVENT DUPLICATES
+  ========================= */
+  const rows = sheet.getDataRange().getValues();
+
+  for(let i=1;i<rows.length;i++){
+    if(rows[i][1] == reference){
+      return respond({status:"duplicate"});
+    }
+  }
+
+  /* =========================
+     SAVE VERIFIED PAYMENT
+  ========================= */
+  sheet.appendRow([
+    new Date(),
+    reference,
+    name,
+    email,
+    phone,
+    amount,
+    "COMPLETE"
+  ]);
+
+  /* =========================
+     EMAIL + ADMIN
+  ========================= */
+  sendReceipt(email,name,amount,reference);
+  notifyAdmins(name,amount,email,phone);
+
+  return respond({status:"saved"});
+}
+
+/*********************************
+ * 🔐 VERIFY WEBHOOK SIGNATURE
+ *********************************/
+const INTASEND_SECRET = "YOUR_WEBHOOK_SECRET";
+
+function verifyIntaSendSignature(payload, signature){
+
+  const expected = Utilities.computeHmacSha256Signature(
+    payload,
+    INTASEND_SECRET
+  );
+
+  const expectedHex = expected.map(b=>{
+    const v = (b < 0 ? b + 256 : b).toString(16);
+    return v.length === 1 ? "0"+v : v;
+  }).join("");
+
+  return expectedHex === signature;
+}
+
+
+
+
+
+
+
+
+
+/*********************************
  * 🌍 ORIGIN CHECK (APPENDED SAFE)
  *********************************/
 (function(){
