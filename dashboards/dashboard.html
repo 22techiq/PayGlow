@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayGlow  Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  font-family:Inter,sans-serif;
+  background:#f1f5f9;
+  padding:20px;
+  margin:0;
+}
+
+h2{ margin-bottom:15px; }
+
+.stats{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+
+.stat{
+  flex:1;
+  min-width:140px;
+  background:#2563eb;
+  color:#fff;
+  padding:12px;
+  border-radius:10px;
+  text-align:center;
+  font-weight:600;
+}
+
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.btn{
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
+  background:#16a34a;
+  color:#fff;
+  cursor:pointer;
+  margin-bottom:10px;
+}
+
+.table-container{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+  table-layout:absolute; /*otherwise fixed*/
+}
+
+th,td{
+  padding:8px;
+  border:1px solid #e2e8f0;
+  text-align:left;
+  word-wrap:break-word;
+}
+
+th{
+  background:#0f172a;
+  color:#fff;
+}
+
+tr:nth-child(even){
+  background:#f8fafc;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📊 PayGlow Dashboard</h2>
+
+<div class="stats">
+  <div class="stat">Total: <span id="total">0</span></div>
+  <div class="stat">Donations: <span id="count">0</span></div>
+</div>
+
+<div class="card">
+
+  <button class="btn" onclick="downloadPDF()">⬇ Download PDF</button>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>S/N</th>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Amount</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbyniLnYgr1NBqJxcju4hfuei1OkddDUHYqXOMSmcqlFT4R89J8oIm6upc6V4sV-64at/exec";
+
+/* MASKING */
+function maskPhone(phone){
+  if(!phone) return "-";
+  phone = phone.toString();
+  return phone.slice(0,6) + "***" + phone.slice(-3);
+}
+
+function maskEmail(email){
+  if(!email || !email.includes("@")) return "-";
+  const [name, domain] = email.split("@");
+  return name.slice(0,4) + "***@" + domain;
+}
+
+/* LOAD DATA */
+async function loadData(){
+  try{
+    const res = await fetch(API_URL + "?admin=1");
+    const data = await res.json();
+
+    let total = 0;
+    const table = document.getElementById("tableBody");
+    table.innerHTML = "";
+
+    data.forEach((d, index)=>{
+
+      total += Number(d.amount || 0);
+
+      table.innerHTML += `
+        <tr>
+          <td>${index+1}</td>
+          <td>${d.name}</td>
+          <td>${maskPhone(d.phone)}</td>
+          <td>${maskEmail(d.email)}</td>
+          <td>KES ${d.amount}</td>
+          <td>${d.date ? new Date(d.date).toLocaleString() : "-"}</td>
+        </tr>
+      `;
+    });
+
+    document.getElementById("total").innerText = "KES " + total;
+    document.getElementById("count").innerText = data.length;
+
+  }catch(e){
+    console.error(e);
+  }
+}
+
+loadData();
+setInterval(loadData,5000);
+
+/* =========================
+   PDF EXPORT (NO TRUNCATION)
+========================= */
+async function downloadPDF(){
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const res = await fetch(API_URL + "?admin=1");
+  const data = await res.json();
+
+  let y = 20;
+  let total = 0;
+
+  /* WATERMARK */
+  function addWatermark(){
+    doc.setTextColor(200,200,200);
+    doc.setFontSize(40);
+    doc.text("PayGlow", 105, 150, { align: "center", angle: 45 });
+
+    doc.setFontSize(12);
+    doc.text("CONFIDENTIAL", 105, 165, { align: "center", angle: 45 });
+
+    doc.setTextColor(0,0,0);
+  }
+
+  addWatermark();
+
+  /* HEADER */
+  doc.setFontSize(14);
+  doc.text("PayGlow Donation Report", 10, 10);
+
+  doc.setFontSize(9);
+  doc.text("Generated: " + new Date().toLocaleString(), 10, 15);
+
+  /* TABLE HEADER */
+  y = 25;
+  doc.setFont(undefined,"bold");
+
+  doc.text("S/N", 10, y);
+  doc.text("Name", 20, y);
+  doc.text("Phone", 50, y);
+  doc.text("Email", 85, y);
+  doc.text("Amount", 135, y);
+  doc.text("Date & Time", 165, y);
+
+  y += 6;
+  doc.setFont(undefined,"normal");
+
+  data.forEach((d, index)=>{
+
+    total += Number(d.amount || 0);
+
+    if(y > 270){
+      doc.addPage();
+      addWatermark();
+      y = 20;
+    }
+
+    const dateTime = d.date
+      ? new Date(d.date).toLocaleString()
+      : "-";
+
+    const name = doc.splitTextToSize(d.name || "-", 25);
+    const phone = doc.splitTextToSize(maskPhone(d.phone), 30);
+    const email = doc.splitTextToSize(maskEmail(d.email), 40);
+    const dateText = doc.splitTextToSize(dateTime, 30);
+
+    const maxLines = Math.max(
+      name.length,
+      phone.length,
+      email.length,
+      dateText.length
+    );
+
+    doc.text(String(index+1), 10, y);
+    doc.text(name, 20, y);
+    doc.text(phone, 50, y);
+    doc.text(email, 85, y);
+    doc.text("KES " + d.amount, 135, y);
+    doc.text(dateText, 165, y);
+
+    y += (maxLines * 6);
+  });
+
+  /* TOTAL */
+  y += 10;
+  doc.setFont(undefined,"bold");
+  doc.text("Total Raised: KES " + total, 10, y);
+
+  /* FOOTER */
+  doc.setFontSize(9);
+  doc.text("PayGlow • Secure Donation System • This is a system generated document.--McOwino-- ", 10, 290);
+
+  doc.save("PayGlow_Report.pdf");
+}
+
+</script>
+
+</body>
+</html>
