@@ -1,0 +1,243 @@
+<!--WORKING WITH Adv-working sheet-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PayGlow Support</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- reCAPTCHA -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<!-- IntaSend -->
+<script src="https://unpkg.com/intasend-inlinejs-sdk@3.0.0/build/intasend-inline.js"></script>
+
+<style>
+body{
+  font-family:Inter;
+  background:#f1f5f9;
+  margin:0;
+  padding:20px;
+  text-align:center;
+}
+
+.box{
+  max-width:340px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+h3{
+  margin-bottom:10px;
+}
+
+input{
+  width:90%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.marquee{
+  background:#0f172a;
+  color:#fff;
+  padding:8px;
+  font-size:12px;
+  margin-bottom:10px;
+  border-radius:6px;
+}
+
+.total{
+  font-size:13px;
+  color:#2563eb;
+  margin-bottom:10px;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h3>Support This Project 💙</h3>
+
+<div class="marquee">
+  <marquee id="donorFeed">Loading supporters...</marquee>
+</div>
+
+<div class="total" id="total">Loading total...</div>
+
+<input id="name" placeholder="Full Name">
+<input id="phone" placeholder="2547XXXXXXXX">
+<input id="email" placeholder="Email">
+<input id="amount" type="number" placeholder="Amount (KES)">
+
+<!-- ✅ reCAPTCHA -->
+<div class="g-recaptcha" data-sitekey="6Ldpl5wsAAAAAFSiNv_hdn7db0YBlnqrQ0AJ9CaM"></div>
+
+<button onclick="pay()">Contribute</button>
+
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxT5HmpEUCPzlPiaWwuIYs4O3DEZ5wPq22fclOA8x4uhsqXKrsbtmOBdsKrg1KwAGPD/exec";
+
+/* =========================
+   VALIDATION
+========================= */
+function validate(){
+
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const amount = Number(document.getElementById("amount").value);
+
+  if(name.length < 3){
+    alert("Enter valid name");
+    return null;
+  }
+
+  if(!/^2547\d{8}$/.test(phone)){
+    alert("Phone must be 2547XXXXXXXX");
+    return null;
+  }
+
+  if(!email.includes("@")){
+    alert("Invalid email");
+    return null;
+  }
+
+  if(!amount || amount < 10){
+    alert("Minimum 10 KES");
+    return null;
+  }
+
+  /* 🔐 CAPTCHA CHECK */
+  const token = grecaptcha.getResponse();
+  if(token.length === 0){
+    alert("Please verify you're not a robot");
+    return null;
+  }
+
+  return {name,phone,email,amount,token};
+}
+
+/* =========================
+   PAYMENT
+========================= */
+function pay(){
+
+  const data = validate();
+  if(!data) return;
+
+  new window.IntaSend({
+    publicAPIKey: "ISPubKey_live_79fff6a0-2a9e-4e38-b442-d00c56a58789",
+    live: true
+  })
+  .on("COMPLETE", async (res)=>{
+
+    try{
+
+      /* 🔥 FORM DATA (CRITICAL FIX) */
+      const formData = new FormData();
+      formData.append("origin", window.location.origin);
+      formData.append("name", data.name);
+      formData.append("phone", data.phone);
+      formData.append("email", data.email);
+      formData.append("amount", data.amount);
+      formData.append("reference", res.invoice_id || Date.now());
+      formData.append("token", data.token); // 🔐 CAPTCHA TOKEN
+
+      const response = await fetch(API_URL,{
+        method:"POST",
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if(result.status !== "success"){
+        alert("⚠️ Failed to save transaction: " + result.message);
+        return;
+      }
+
+      alert("🎉 Payment successful!");
+
+      grecaptcha.reset();
+
+      loadFeed();
+
+    }catch(err){
+      alert("⚠️ Network error");
+    }
+
+  })
+  .on("FAILED",()=>alert("Payment failed"))
+  .run({
+    amount: data.amount,
+    currency: "KES",
+    email: data.email,
+    phone_number: data.phone,
+    first_name: data.name
+  });
+}
+
+/* =========================
+   LOAD FEED + TOTAL
+========================= */
+async function loadFeed(){
+
+  try{
+
+    const res = await fetch(API_URL);
+    const data = await res.json();
+
+    if(!Array.isArray(data)) return;
+
+    let total = 0;
+
+    data.forEach(d => total += Number(d.amount || 0));
+
+    document.getElementById("total").innerText =
+      "KES " + total + " raised";
+
+    const feed = data
+      .slice(-10)
+      .reverse()
+      .map(d => `${d.name} donated KES ${d.amount}`)
+      .join("   •   ");
+
+    document.getElementById("donorFeed").innerText = feed;
+
+  }catch{
+    document.getElementById("donorFeed").innerText =
+      "Supporters making impact 💙";
+  }
+}
+
+loadFeed();
+setInterval(loadFeed,5000);
+
+</script>
+
+</body>
+</html>
